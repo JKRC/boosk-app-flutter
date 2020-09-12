@@ -1,4 +1,5 @@
 import 'package:books_app/blocs/home_bloc.dart';
+import 'package:books_app/home/widgets/book.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatelessWidget {
@@ -17,12 +18,23 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white,
-        body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          padding: EdgeInsets.only(top: 42, left: 20),
-          child: Column(
-            children: [textTitle(), streamBuilderIndexChip(context)],
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(top: 42, left: 20),
+            child: Column(
+              children: [
+                textTitle(),
+                streamBuilderIndexChip(context),
+                ListView.builder(
+                  shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                  itemCount: categories.length,
+                    itemBuilder: (context, index){
+                      return BookWidget();
+                    }
+                )
+              ],
+            ),
           ),
         ));
   }
@@ -33,7 +45,7 @@ class HomePage extends StatelessWidget {
       children: [
         Text(
           "Browse",
-          style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
         ),
         SizedBox(
           width: 24,
@@ -41,7 +53,7 @@ class HomePage extends StatelessWidget {
         Text(
           "Recomended",
           style: TextStyle(
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.grey[400]),
         )
@@ -53,7 +65,8 @@ class HomePage extends StatelessWidget {
   Container streamBuilderIndexChip(context) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: 80,
+      margin: EdgeInsets.only(top: 20),
+      height: 40,
       child: StreamBuilder<int>(
         stream: _homeBloc.streamIndex,
         builder: (context, snapshot) {
