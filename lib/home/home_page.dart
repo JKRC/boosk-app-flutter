@@ -1,6 +1,12 @@
 import 'package:books_app/blocs/home_bloc.dart';
+import 'package:books_app/home/bloc/home_page_event.dart';
 import 'package:books_app/home/widgets/book.dart';
+import 'package:books_app/repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'bloc/home_page_bloc.dart';
+import 'bloc/home_page_state.dart';
 
 class HomePage extends StatelessWidget {
   final List<String> categories = [
@@ -13,28 +19,48 @@ class HomePage extends StatelessWidget {
   ];
 
   final HomeBloc _homeBloc = HomeBloc();
+  final HomePageBloc _bloc = HomePageBloc(repository: Repository());
 
   @override
   Widget build(BuildContext context) {
+    _bloc.dispatch(HomePageEventSearch(query: categories[0]));
     return Scaffold(
         backgroundColor: Colors.white,
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.only(top: 42, left: 20),
-            child: Column(
-              children: [
-                textTitle(),
-                streamBuilderIndexChip(context),
-                ListView.builder(
-                  shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                  itemCount: categories.length,
-                    itemBuilder: (context, index){
-                      return BookWidget();
-                    }
-                )
-              ],
-            ),
+        body: Padding(
+          padding: EdgeInsets.only(top: 42, left: 20),
+          child: Column(
+            children: [
+              textTitle(),
+              streamBuilderIndexChip(context),
+              BlocBuilder(
+                bloc: _bloc,
+                builder: (context, state) {
+                  if (state is HomePageStateLoading)
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  if (state is HomePageStateError)
+                    return Center(
+                      child: Text(
+                        state.message,
+                        style: TextStyle(color: Colors.redAccent),
+                      ),
+                    );
+                  if (state is HomePageStateSuccess) {
+                    final books = state.books;
+                    return Expanded(
+                      child: ListView.builder(
+                          itemCount: books.length,
+                          itemBuilder: (context, index) {
+                            final book = books[index];
+                            return BookWidget(book: book,);
+                          }),
+                    );
+                  }
+                  return SizedBox.shrink();
+                },
+              )
+            ],
           ),
         ));
   }
@@ -85,9 +111,7 @@ class HomePage extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6.0),
           child: GestureDetector(
-            onTap: () {
-              _homeBloc.setIndex(index);
-            },
+            onTap: () => _onCategorySelected(index),
             child: Chip(
               padding: EdgeInsets.symmetric(horizontal: 8),
               backgroundColor:
@@ -104,5 +128,10 @@ class HomePage extends StatelessWidget {
         );
       },
     );
+  }
+
+  _onCategorySelected(int index) {
+    _homeBloc.setIndex(index);
+    _bloc.dispatch(HomePageEventSearch(query: categories[index]));
   }
 }

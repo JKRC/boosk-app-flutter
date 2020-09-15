@@ -1,8 +1,14 @@
+import 'package:books_app/models/models.dart';
 import 'package:flutter/material.dart';
 
 class BookWidget extends StatelessWidget {
   final String imageUrl =
       "https://static.toiimg.com/thumb/72975551.cms?width=680&height=512&imgsize=881753";
+  final Book book;
+
+  BookWidget({Key key, @required this.book})
+      : assert(book != null),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,12 +45,16 @@ class BookWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           Text(
-            "Book Title",
+            book.volumeInfo.title,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            maxLines: 3,
           ),
           Text(
-            "Book author",
+            book.volumeInfo?.authors.toString(),
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(color: Colors.grey),
+            maxLines: 2,
           ),
           Align(
             alignment: Alignment.centerRight,
@@ -58,15 +68,16 @@ class BookWidget extends StatelessWidget {
     );
   }
 
-  ClipRRect image() {
-    return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(12)),
-      child: Image.network(
-        imageUrl,
-        fit: BoxFit.fill,
-        width: 200,
-        height: 250,
-      ),
+  Container image() {
+    return Container(
+      width: 200,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+          border: Border.all(width: 0.7, color: Colors.black12),
+          image: DecorationImage(
+            fit: BoxFit.fill,
+            image: NetworkImage(book.volumeInfo.imageLinks.smallThumbnail),
+          )),
     );
   }
 }
