@@ -16,7 +16,8 @@ class HomePageStateLoading extends HomePageState{
 
 class HomePageStateSuccess extends HomePageState{
   final List<Book> books;
-  HomePageStateSuccess({@required this.books});
+  final int index;
+  HomePageStateSuccess({@required this.books, @required this.index});
 
   @override
   String toString() {

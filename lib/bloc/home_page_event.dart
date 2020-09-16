@@ -6,9 +6,11 @@ class HomePageEvent extends Equatable{
 
 class HomePageEventSearch extends HomePageEvent{
   final String query;
+  final int index;
 
   HomePageEventSearch({
-    @required this.query
+    @required this.query,
+    @required this.index
   });
 
   @override

@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:books_app/home/bloc/home_page_event.dart';
-import 'package:books_app/home/bloc/home_page_state.dart';
+import 'home_page_event.dart';
+import 'home_page_state.dart';
 import 'package:books_app/repository.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -21,7 +21,7 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState>{
       var query = event.query;
       var books = await repository.getBooks(query);
       if(books != null){
-        yield HomePageStateSuccess(books: books);
+        yield HomePageStateSuccess(books: books, index: event.index);
       }
       else{
         yield HomePageStateError(message: "Internet Error");

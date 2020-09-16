@@ -1,12 +1,10 @@
-import 'package:books_app/blocs/home_bloc.dart';
-import 'package:books_app/home/bloc/home_page_event.dart';
 import 'package:books_app/home/widgets/book.dart';
 import 'package:books_app/repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'bloc/home_page_bloc.dart';
-import 'bloc/home_page_state.dart';
+import 'package:books_app/bloc/home_page_event.dart';
+import 'package:books_app/bloc/home_page_bloc.dart';
+import 'package:books_app/bloc/home_page_state.dart';
 
 class HomePage extends StatelessWidget {
   final List<String> categories = [
@@ -18,7 +16,6 @@ class HomePage extends StatelessWidget {
     "PHP"
   ];
 
-  final HomeBloc _homeBloc = HomeBloc();
   final HomePageBloc _bloc = HomePageBloc(repository: Repository());
 
   @override
@@ -31,7 +28,6 @@ class HomePage extends StatelessWidget {
           child: Column(
             children: [
               textTitle(),
-              streamBuilderIndexChip(context),
               BlocBuilder(
                 bloc: _bloc,
                 builder: (context, state) {
@@ -49,12 +45,22 @@ class HomePage extends StatelessWidget {
                   if (state is HomePageStateSuccess) {
                     final books = state.books;
                     return Expanded(
-                      child: ListView.builder(
-                          itemCount: books.length,
-                          itemBuilder: (context, index) {
-                            final book = books[index];
-                            return BookWidget(book: book,);
-                          }),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          listChips(state.index),
+                          Expanded(
+                            child: ListView.builder(
+                                itemCount: books.length,
+                                itemBuilder: (context, index) {
+                                  final book = books[index];
+                                  return BookWidget(
+                                    book: book,
+                                  );
+                                }),
+                          )
+                        ],
+                      ),
                     );
                   }
                   return SizedBox.shrink();
@@ -87,51 +93,39 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  //code of list chips
-  Container streamBuilderIndexChip(context) {
+  Container listChips(selectedChip) {
     return Container(
-      width: MediaQuery.of(context).size.width,
       margin: EdgeInsets.only(top: 20),
       height: 40,
-      child: StreamBuilder<int>(
-        stream: _homeBloc.streamIndex,
-        builder: (context, snapshot) {
-          return listChips(snapshot.data);
-        },
-      ),
-    );
-  }
-
-  ListView listChips(selectedChip) {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: categories.length,
-      scrollDirection: Axis.horizontal,
-      itemBuilder: (BuildContext context, int index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6.0),
-          child: GestureDetector(
-            onTap: () => _onCategorySelected(index),
-            child: Chip(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              backgroundColor:
-                  index == selectedChip ? Colors.blue : Colors.grey[300],
-              label: Text(
-                categories.elementAt(index),
-                style: TextStyle(
-                    color: index == selectedChip
-                        ? Colors.white70
-                        : Colors.grey[500]),
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: categories.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (BuildContext context, int index) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+            child: GestureDetector(
+              onTap: () => _onCategorySelected(index),
+              child: Chip(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                backgroundColor:
+                index == selectedChip ? Colors.blue : Colors.grey[300],
+                label: Text(
+                  categories.elementAt(index),
+                  style: TextStyle(
+                      color: index == selectedChip
+                          ? Colors.white70
+                          : Colors.grey[500]),
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      )
     );
   }
 
   _onCategorySelected(int index) {
-    _homeBloc.setIndex(index);
-    _bloc.dispatch(HomePageEventSearch(query: categories[index]));
+    _bloc.dispatch(HomePageEventSearch(query: categories[index], index: index));
   }
 }
